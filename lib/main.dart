@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'screens/camera_page.dart';
 import 'screens/gps_page.dart';
 import 'screens/bluetooth_page.dart';
 import 'screens/microphone_page.dart';
 import 'screens/accelerometer_page.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   runApp(MyApp());
 }
 

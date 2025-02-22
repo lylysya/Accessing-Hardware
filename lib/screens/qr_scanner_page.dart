@@ -14,10 +14,8 @@ class _QRScannerPageState extends State<QRScannerPage> {
   @override
   void reassemble() {
     super.reassemble();
-    if (controller != null) {
-      controller!.pauseCamera();
-      controller!.resumeCamera();
-    }
+    controller?.pauseCamera();
+    controller?.resumeCamera();
   }
 
   @override
@@ -38,7 +36,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("QR Code Scanner")),
+      appBar: AppBar(title: Text("QR Scanner")),
       body: Column(
         children: [
           Expanded(
@@ -50,12 +48,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
           ),
           Expanded(
             flex: 1,
-            child: Center(
-              child: Text(
-                "Scanned: $scannedData",
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
+            child: Center(child: Text("Scanned: $scannedData", style: TextStyle(fontSize: 18))),
           ),
         ],
       ),

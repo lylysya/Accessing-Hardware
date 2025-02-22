@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class GPSPage extends StatefulWidget {
   @override
@@ -9,13 +10,7 @@ class GPSPage extends StatefulWidget {
 
 class _GPSPageState extends State<GPSPage> {
   LatLng? _currentLocation;
-
-  Future<void> _getCurrentLocation() async {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      _currentLocation = LatLng(position.latitude, position.longitude);
-    });
-  }
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -23,14 +18,53 @@ class _GPSPageState extends State<GPSPage> {
     _getCurrentLocation();
   }
 
+  Future<void> _getCurrentLocation() async {
+    var status = await Permission.location.request();
+    if (status.isGranted) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 5), // Timeout 5s
+        );
+
+        setState(() {
+          _currentLocation = LatLng(position.latitude, position.longitude);
+        });
+
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLng(_currentLocation!),
+        );
+      } catch (e) {
+        print("Error getting location: $e");
+      }
+    } else {
+      print("Location permission denied.");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("GPS Location")),
-      body: Center(
-        child: _currentLocation == null
-            ? CircularProgressIndicator()
-            : Text("Lat: ${_currentLocation!.latitude}, Lng: ${_currentLocation!.longitude}"),
+      body: _currentLocation == null
+          ? Center(child: CircularProgressIndicator())
+          : GoogleMap(
+              onMapCreated: (controller) => _mapController = controller,
+              initialCameraPosition: CameraPosition(
+                target: _currentLocation!,
+                zoom: 15,
+              ),
+              markers: {
+                Marker(
+                  markerId: MarkerId("current"),
+                  position: _currentLocation!,
+                  infoWindow: InfoWindow(title: "Your Location"),
+                ),
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _getCurrentLocation,
+        child: Icon(Icons.location_searching),
       ),
     );
   }
